@@ -36,7 +36,7 @@ public class CalendarCellView extends TextView {
   private boolean isHighlighted = false;
   private RangeState rangeState = RangeState.NONE;
 
-  @SuppressWarnings("UnusedDeclaration")
+  @SuppressWarnings("UnusedDeclaration") //
   public CalendarCellView(Context context, AttributeSet attrs) {
     super(context, attrs);
   }
@@ -64,6 +64,18 @@ public class CalendarCellView extends TextView {
   public void setHighlighted(boolean highlighted) {
     isHighlighted = highlighted;
     refreshDrawableState();
+  }
+
+  public boolean isCurrentMonth() {
+    return isCurrentMonth;
+  }
+
+  public boolean isToday() {
+    return isToday;
+  }
+
+  public boolean isSelectable() {
+    return isSelectable;
   }
 
   @Override protected int[] onCreateDrawableState(int extraSpace) {

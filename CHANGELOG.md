@@ -1,6 +1,33 @@
 Change Log
 ==========
 
+Version 1.6.2 *(2015-04-28)*
+----------------------------
+
+ * New: Right-To-Left layout support.
+ * Fix: applying decorators after views are rendered now works
+
+Version 1.6.1 *(2015-04-13)*
+----------------------------
+
+ * New: CalendarCellView accessors for various states.  Useful for CalendarCellDecorator implementation.
+
+Version 1.6.0 *(2015-04-10)*
+----------------------------
+
+ * New: `CalendarCellDecorator` - Flexibility to do whatever custom logic you want on top of our cells.
+ * New: `clearHighlightedDates()` - Unhighlights all previously highlighted days.
+ * New: `scrollToDate(Date date)` - Scroll to the month that given date belongs to.
+ * New: `containsDate(List<Calendar> selectedCals, Date date)` - if date is within selectedCals
+ * Fix: When calculating cell width, make sure to cover all of totalWidth.
+
+Version 1.5.0 *(2014-12-15)*
+----------------------------
+
+ * New: Use CellClickInterceptor to implement custom cell-click logic
+ * Fix: Correct default header/title text colors.
+ * Fix: Disallow passing > 2 dates to withSelectedDates when in RANGE mode.
+
 Version 1.4.1 *(2014-10-27)*
 ----------------------------
 

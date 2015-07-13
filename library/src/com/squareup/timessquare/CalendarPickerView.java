@@ -92,6 +92,19 @@ public class CalendarPickerView extends ListView {
   private DateSelectableFilter dateConfiguredListener;
   private OnInvalidDateSelectedListener invalidDateListener =
       new DefaultOnInvalidDateSelectedListener();
+  private CellClickInterceptor cellClickInterceptor;
+  private List<CalendarCellDecorator> decorators;
+
+  public void setDecorators(List<CalendarCellDecorator> decorators) {
+    this.decorators = decorators;
+    if (null != adapter) {
+      adapter.notifyDataSetChanged();
+    }
+  }
+
+  public List<CalendarCellDecorator> getDecorators() {
+    return decorators;
+  }
 
   public CalendarPickerView(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -161,10 +174,6 @@ public class CalendarPickerView extends ListView {
     if (minDate.after(maxDate)) {
       throw new IllegalArgumentException(
           "minDate must be before maxDate.  " + dbg(minDate, maxDate));
-    }
-    if (minDate.getTime() == 0 || maxDate.getTime() == 0) {
-      throw new IllegalArgumentException(
-          "minDate and maxDate must be non-zero.  " + dbg(minDate, maxDate));
     }
     if (locale == null) {
       throw new IllegalArgumentException("Locale is null.");
@@ -271,6 +280,10 @@ public class CalendarPickerView extends ListView {
       if (selectionMode == SelectionMode.SINGLE && selectedDates.size() > 1) {
         throw new IllegalArgumentException("SINGLE mode can't be used with multiple selectedDates");
       }
+      if (selectionMode == SelectionMode.RANGE && selectedDates.size() > 2) {
+        throw new IllegalArgumentException(
+            "RANGE mode only allows two selectedDates.  You tried to pass " + selectedDates.size());
+      }
       if (selectedDates != null) {
         for (Date date : selectedDates) {
           selectDate(date);
@@ -318,8 +331,7 @@ public class CalendarPickerView extends ListView {
 
   private void scrollToSelectedMonth(final int selectedIndex, final boolean smoothScroll) {
     post(new Runnable() {
-      @Override
-      public void run() {
+      @Override public void run() {
         Logr.d("Scrolling to position %d", selectedIndex);
 
         if (smoothScroll) {
@@ -354,6 +366,25 @@ public class CalendarPickerView extends ListView {
     } else if (todayIndex != null) {
       scrollToSelectedMonth(todayIndex);
     }
+  }
+
+  public boolean scrollToDate(Date date) {
+    Integer selectedIndex = null;
+
+    Calendar cal = Calendar.getInstance(locale);
+    cal.setTime(date);
+    for (int c = 0; c < months.size(); c++) {
+      MonthDescriptor month = months.get(c);
+      if (sameMonth(cal, month)) {
+        selectedIndex = c;
+        break;
+      }
+    }
+    if (selectedIndex != null) {
+      scrollToSelectedMonth(selectedIndex);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -450,6 +481,9 @@ public class CalendarPickerView extends ListView {
     @Override public void handleClick(MonthCellDescriptor cell) {
       Date clickedDate = cell.getDate();
 
+      if (cellClickInterceptor != null && cellClickInterceptor.onCellClicked(clickedDate)) {
+        return;
+      }
       if (!betweenDates(clickedDate, minCal, maxCal) || !isDateSelectable(clickedDate)) {
         if (invalidDateListener != null) {
           invalidDateListener.onInvalidDateSelected(clickedDate);
@@ -512,14 +546,11 @@ public class CalendarPickerView extends ListView {
     if (date == null) {
       throw new IllegalArgumentException("Selected date must be non-null.");
     }
-    if (date.getTime() == 0) {
-      throw new IllegalArgumentException("Selected date must be non-zero.  " + date);
-    }
     if (date.before(minCal.getTime()) || date.after(maxCal.getTime())) {
-      throw new IllegalArgumentException(
-          String.format("SelectedDate must be between minDate and maxDate."
-                  + "%nminDate: %s%nmaxDate: %s%nselectedDate: %s",
-                  minCal.getTime(), maxCal.getTime(), date));
+      throw new IllegalArgumentException(String.format(
+          "SelectedDate must be between minDate and maxDate."
+              + "%nminDate: %s%nmaxDate: %s%nselectedDate: %s", minCal.getTime(), maxCal.getTime(),
+          date));
     }
   }
 
@@ -596,6 +627,19 @@ public class CalendarPickerView extends ListView {
     for (MonthCellDescriptor selectedCell : selectedCells) {
       // De-select the currently-selected cell.
       selectedCell.setSelected(false);
+
+      if (dateListener != null) {
+        Date selectedDate = selectedCell.getDate();
+
+        if (selectionMode == SelectionMode.RANGE) {
+          int index = selectedCells.indexOf(selectedCell);
+          if (index == 0 || index == selectedCells.size() - 1) {
+            dateListener.onDateUnselected(selectedDate);
+          }
+        } else {
+          dateListener.onDateUnselected(selectedDate);
+        }
+      }
     }
     selectedCells.clear();
     selectedCals.clear();
@@ -636,8 +680,17 @@ public class CalendarPickerView extends ListView {
       }
     }
 
-    adapter.notifyDataSetChanged();
-    setAdapter(adapter);
+    validateAndUpdate();
+  }
+
+  public void clearHighlightedDates() {
+    for (MonthCellDescriptor cal : highlightedCells) {
+      cal.setHighlighted(false);
+    }
+    highlightedCells.clear();
+    highlightedCals.clear();
+
+    validateAndUpdate();
   }
 
   /** Hold a cell with a month-index. */
@@ -702,7 +755,9 @@ public class CalendarPickerView extends ListView {
         monthView =
             MonthView.create(parent, inflater, weekdayNameFormat, listener, today, dividerColor,
                 dayBackgroundResId, dayTextColorResId, titleTextColor, displayHeader,
-                headerTextColor);
+                headerTextColor, decorators, locale);
+      } else {
+        monthView.setDecorators(decorators);
       }
       monthView.init(months.get(position), cells.get(position), displayOnly, titleTypeface,
           dateTypeface);
@@ -758,6 +813,12 @@ public class CalendarPickerView extends ListView {
       }
     }
     return cells;
+  }
+
+  private boolean containsDate(List<Calendar> selectedCals, Date date) {
+    Calendar cal = Calendar.getInstance(locale);
+    cal.setTime(date);
+    return containsDate(selectedCals, cal);
   }
 
   private static boolean containsDate(List<Calendar> selectedCals, Calendar cal) {
@@ -834,6 +895,11 @@ public class CalendarPickerView extends ListView {
     dateConfiguredListener = listener;
   }
 
+  /** Set a listener to intercept clicks on calendar cells. */
+  public void setCellClickInterceptor(CellClickInterceptor listener) {
+    cellClickInterceptor = listener;
+  }
+
   /**
    * Interface to be notified when a new date is selected or unselected. This will only be called
    * when the user initiates the date selection.  If you call {@link #selectDate(Date)} this
@@ -866,6 +932,16 @@ public class CalendarPickerView extends ListView {
    */
   public interface DateSelectableFilter {
     boolean isDateSelectable(Date date);
+  }
+
+  /**
+   * Interface to be notified when a cell is clicked and possibly intercept the click.  Return true
+   * to intercept the click and prevent any selections from changing.
+   *
+   * @see #setCellClickInterceptor(CellClickInterceptor)
+   */
+  public interface CellClickInterceptor {
+    boolean onCellClicked(Date date);
   }
 
   private class DefaultOnInvalidDateSelectedListener implements OnInvalidDateSelectedListener {
