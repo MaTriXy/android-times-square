@@ -1,6 +1,87 @@
 Change Log
 ==========
 
+Version 1.7.11 *(2022-04-06)*
+----------------------------
+
+ * Adds support for using a theme attribute for tsquare_dayTextColor
+
+Version 1.7.10 *(2018-07-23)*
+----------------------------
+
+ * New language: Ukranian
+
+Version 1.7.9 *(2018-04-26)*
+----------------------------
+
+ * New: custom cells (using a DayViewAdapter) can now have taller contents than the default 1x1 cell.
+
+Version 1.7.7 *(2017-12-08)*
+----------------------------
+
+ * Improved: `tsquare_displayAlwaysDigitNumbers` now also applies to the year in Burmese/Arabic
+
+Version 1.7.6 *(2017-12-04)*
+----------------------------
+
+ * Improved: better month name formatting for Chinese/Japenese.
+ * New: `tsquare_displayAlwaysDigitNumbers` to override the locale setting and show digits on day cells.
+
+
+Version 1.7.5 *(2017-10-12)*
+----------------------------
+
+ * New: `tsquare_titleTextStyle` allows full styling of the month title view
+ * Removed: `tsquare_titleTextColor` (use `tsquare_titleTextStyle` instead)
+
+Version 1.7.4 *(2017-10-03)*
+----------------------------
+
+ * New: `tsquare_displayDayNamesHeaderRow` allows hiding the day names header row
+
+Version 1.7.3 *(2017-05-03)*
+----------------------------
+
+ * New: withMonthsReverseOrder for reversing the order of months
+ * New: RangeState is now accessible so getRangeState actually works
+ * New language: Esperanto
+
+Version 1.7.2 *(2017-04-06)*
+----------------------------
+
+ * New: clearSelectedDates() method so you can clear an entire RANGE
+
+Version 1.7.1 *(2017-02-28)*
+----------------------------
+
+ * Improved: significant performance improvement for large calendar ranges
+ * New: isHighlighted() and getRangeState()
+
+Version 1.7.0 *(2016-10-26)*
+----------------------------
+
+ * New: Support for specifying the timezone
+ * New languages: Serbian and Russian!
+
+Version 1.6.5 *(2016-02-08)*
+----------------------------
+
+ * New: Support for arabic numbers
+ * New: Performance improvement in CalendarCellView
+ * New: Support for completely custom cell views
+ * New: Support for a custom "highlighted" color
+ * New language: Polish!
+
+Version 1.6.4 *(2015-09-01)*
+----------------------------
+
+ * Convert build to gradle to hopefully fix another support-library issue.
+
+Version 1.6.3 *(2015-08-18)*
+----------------------------
+
+ * Fix: compatibility with appcompat 23
+
 Version 1.6.2 *(2015-04-28)*
 ----------------------------
 

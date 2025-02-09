@@ -26,8 +26,14 @@
         <property name="message" value="Space needed around ':' character."/>
     </module>
 
+    <!-- Checks for Size Violations.                    -->
+    <!-- See http://checkstyle.sf.net/config_sizes.html -->
+    <module name="LineLength">
+        <property name="max" value="100"/>
+    </module>
+
     <module name="TreeWalker">
-        <property name="cacheFile" value="${checkstyle.cache.file}"/>
+        <!-- <property name="cacheFile" value="${checkstyle.cache.file}"/> -->
 
         <!-- Checks for Javadoc comments.                     -->
         <!-- See http://checkstyle.sf.net/config_javadoc.html -->
@@ -58,11 +64,6 @@
         <module name="UnusedImports"/>
 
 
-        <!-- Checks for Size Violations.                    -->
-        <!-- See http://checkstyle.sf.net/config_sizes.html -->
-        <module name="LineLength">
-            <property name="max" value="100"/>
-        </module>
         <module name="MethodLength"/>
         <!--module name="ParameterNumber"/-->
 
@@ -100,7 +101,7 @@
         <!-- See http://checkstyle.sf.net/config_coding.html -->
         <!--module name="AvoidInlineConditionals"/-->
         <module name="CovariantEquals"/>
-        <module name="DoubleCheckedLocking"/>
+        <!-- <module name="DoubleCheckedLocking"/> -->
         <module name="EmptyStatement"/>
         <!--<module name="EqualsAvoidNull"/>-->
         <module name="EqualsHashCode"/>
@@ -109,7 +110,7 @@
         <!--<module name="InnerAssignment"/>-->
         <!--module name="MagicNumber"/-->
         <module name="MissingSwitchDefault"/>
-        <module name="RedundantThrows"/>
+        <!--<module name="RedundantThrows"/>-->
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
 
